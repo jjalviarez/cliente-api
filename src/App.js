@@ -1,8 +1,13 @@
-import React from 'react';
+import React, {Fragment} from 'react';
+
+/***** Hayout */
+import Header from "./components/layout/Header";
 
 const App = () => {
   return (
-    <h1>hola</h1>
+    <Fragment> 
+      <Header />
+    </Fragment> 
     )
 }
 

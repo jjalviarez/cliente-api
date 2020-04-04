@@ -9,6 +9,7 @@ import Navegacion from "./components/layout/Navegacion";
 import Clientes from "./components/clientes/Clientes";
 import Productos from './components/productos/Productos';
 import Pedidos from './components/pedidos/Pedidos';
+import NuevoCliente from './components/clientes/NuevoCliente';
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
           <main className="caja-contenido col-9">
             <Switch>
               <Route exact path='/' component={Clientes} />
+              <Route exact path='/clientes/nuevo' component={NuevoCliente} />
               <Route exact path='/productos' component={Productos} />
               <Route exact path='/pedidos' component={Pedidos} />
             </Switch>

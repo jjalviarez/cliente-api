@@ -1,11 +1,11 @@
-import React, { useState/*, useEffect*/, Fragment } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
 
-const NuevoCliente = ({history}) => {
-
-       //Trabajar con el state
+const EditarCliente = props => {
+    const {id}= props.match.params
+    //Trabajar con el state
     // cliente = state, guardarCliente 0 funcion para guardar el state
     const [cliente, gurardarCliente] = useState({
         nombre:'',
@@ -15,14 +15,22 @@ const NuevoCliente = ({history}) => {
         telefono:''
     });
 
-    //Query a la API
+    //Query a la API Buscar uno
+    const consultaAPI = async () => {
+        const consulta = await clienteAxios.get('/clientes/'+id);
+        console.log('consulta: ', consulta.data)
+        //colocar  resultado en el state
+        gurardarCliente(consulta.data); 
+    }
+
+    //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.post('/clientes',cliente)
+        clienteAxios.post('/clientes/'+cliente._id,cliente)
             .then(res => {
                 console.log('res :', res);
                 Swal.fire(
-                    'Cleinte creado correctamente!',
+                    'Cleinte Actualizado correctamente!',
                     'You clicked the button!',
                     'success'
                 )
@@ -57,16 +65,16 @@ const NuevoCliente = ({history}) => {
 
     }
 
-/*
+
 
     //user effect es similar a componetdidmont y willmount
     useEffect(() => {
         consultaAPI();
-        return () => {
+        /*return () => {
             cleanup
-        }
+        }*/
     }, []);
-*/
+
     
     return (
         <Fragment>  
@@ -134,4 +142,4 @@ const NuevoCliente = ({history}) => {
 
 
 // HOC (withRouter) toma un componente y tetorna unn nuevo componente 
-export default withRouter(NuevoCliente);
+export default withRouter(EditarCliente);

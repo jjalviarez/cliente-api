@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const Clientes = () => {
 
     //Trabajar con el state
-    // clientes = state, guardarCliente 0 funcion para guardar el state
+    // clientes = state, guardarClientes funcion para guardar el state
     const [clientes, gurardarClientes] = useState([]);
 
 

@@ -7,7 +7,7 @@ const EditarCliente = props => {
     const {id}= props.match.params
     //Trabajar con el state
     // cliente = state, guardarCliente 0 funcion para guardar el state
-    const [cliente, gurardarCliente] = useState({
+    const [cliente, datosCliente] = useState({
         nombre:'',
         apellido:'',
         empresa:'',
@@ -18,15 +18,15 @@ const EditarCliente = props => {
     //Query a la API Buscar uno
     const consultaAPI = async () => {
         const consulta = await clienteAxios.get('/clientes/'+id);
-        console.log('consulta: ', consulta.data)
+        //console.log('consulta: ', consulta.data)
         //colocar  resultado en el state
-        gurardarCliente(consulta.data); 
+        datosCliente(consulta.data); 
     }
 
     //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.post('/clientes/'+cliente._id,cliente)
+        clienteAxios.put('/clientes/'+cliente._id,cliente)
             .then(res => {
                 console.log('res :', res);
                 Swal.fire(
@@ -35,7 +35,7 @@ const EditarCliente = props => {
                     'success'
                 )
                 //redireccionar 
-                history.push('/');
+                props.history.push('/');
             })
             .catch(
                 Swal.fire({
@@ -48,7 +48,7 @@ const EditarCliente = props => {
     }
 
     const handleChange = (e) => {
-        gurardarCliente({
+        datosCliente({
             //Actualuzamos el state agregando una copia del State actual
             ...cliente,
             [e.target.name]:e.target.value});
@@ -56,13 +56,12 @@ const EditarCliente = props => {
 
     //Validar el formulario
     const validarCliente = () => {
-    let valido=true;
-    Object.values(cliente).forEach((value) =>{
-        valido = valido && value.length;
-        //console.log('value :', value);
-    });
+    let valido=cliente.nombre.length&&
+                cliente.apellido.length&&
+                cliente.empresa.length&&
+                cliente.email.length&&
+                cliente.telefono.length;
     return !valido;
-
     }
 
 
@@ -78,7 +77,7 @@ const EditarCliente = props => {
     
     return (
         <Fragment>  
-            <h2>Nuevo CLiente</h2>
+            <h2>Actualizar CLiente</h2>
             <form 
                 onSubmit={handleSubmit}
             >
@@ -90,6 +89,7 @@ const EditarCliente = props => {
                         placeholder="Nombre Cliente" 
                         name="nombre" 
                         onChange={handleChange}
+                        value={cliente.nombre}
                         />
                 </div>
                 <div className="campo">
@@ -99,6 +99,7 @@ const EditarCliente = props => {
                         placeholder="Apellido Cliente" 
                         name="apellido" 
                         onChange={handleChange}
+                        value={cliente.apellido}
                         />
                 </div>
                 <div className="campo">
@@ -108,6 +109,7 @@ const EditarCliente = props => {
                         placeholder="Empresa Cliente" 
                         name="empresa" 
                         onChange={handleChange}
+                        value={cliente.empresa}
                     />
                 </div>
                 <div className="campo">
@@ -117,6 +119,7 @@ const EditarCliente = props => {
                         placeholder="Email Cliente" 
                         name="email" 
                         onChange={handleChange}
+                        value={cliente.email}
                     />
                 </div>
                 <div className="campo">
@@ -125,13 +128,14 @@ const EditarCliente = props => {
                     placeholder="Teléfono Cliente" 
                     name="telefono" 
                     onChange={handleChange}
+                    value={cliente.telefono}
                     />
                 </div>
                 <div className="enviar">
                     <input
                         type="submit" 
                         className="btn btn-azul" 
-                        defaultValue="Agregar Cliente" 
+                        defaultValue="Grardar Cambios" 
                         disabled={validarCliente()}
                     />
                 </div>

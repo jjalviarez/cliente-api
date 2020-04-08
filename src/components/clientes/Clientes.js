@@ -25,7 +25,7 @@ const Clientes = () => {
         /*return () => {
             cleanup
         }*/
-    }, []);
+    }, [clientes]);
 
 
     return (

@@ -5,7 +5,6 @@ import clienteAxios from '../../config/axios';
 
 
 const Producto = ({producto}) => {
-    console.log('producto :', producto);
     const {_id,nombre, precio, imagen} = producto;
 
     //Query a la API Eliminar
@@ -49,7 +48,7 @@ const Producto = ({producto}) => {
         <div className="info-producto">
             <p className="nombre">{nombre}</p>
             <p className="precio">${precio} </p>
-            <img src={"http://localhost:8080/"+imagen} />
+            <img  src={imagen ? "http://localhost:8080/"+imagen : "/imageProduct.jpg" } alt={nombre} />
         </div>
         <div className="acciones">
             <Link to={"/productos/editar/"+_id} className="btn btn-azul">
@@ -62,8 +61,8 @@ const Producto = ({producto}) => {
                 onClick={() => handleClick(_id)}
             >
                 <i className="fas fa-times" />
-                Eliminar Cliente
-            </button>
+                Eliminar Producto
+            </button> 
         </div>
     </li>
     );

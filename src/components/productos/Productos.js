@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment } from 'react'
 import clienteAxios from '../../config/axios';
 import { Link } from 'react-router-dom';
 import Producto from './Producto';
-
+import Spinner from '../layout/Spinner'
 
 const Productos = () => {
 
@@ -10,20 +10,28 @@ const Productos = () => {
     // producto = state, guardarProductos funcion para guardar el state
     const [productos, gurardarProductos] = useState([]);
 
-    //Query a la API
-    const consultaAPI = async () => {
-        const consulta = await clienteAxios.get('/productos');
-        //colocar  resultado en el state
-        gurardarProductos(consulta.data); 
-    }
+
+    
     //user effect es similar a componetdidmont y willmount
     useEffect(() => {
+
+        //Query a la API
+        const consultaAPI =  () => {
+            clienteAxios.get('/productos')
+            .then(res => {
+                //colocar  resultado en el state
+                gurardarProductos(res.data); 
+            })
+        }
+        
         consultaAPI();
         /*return () => {
             cleanup
         }*/
     }, [productos]);
 
+    //Spinner de Carga
+    if(!productos.length) return <Spinner/>
 
     return (
         <Fragment> 

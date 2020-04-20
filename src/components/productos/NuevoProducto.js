@@ -1,10 +1,9 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
 
 const NuevoProducto = props => {
-    const {id}= props.match.params
 
     //producto= State, guardarProducto = setStaet
     const [producto, guardarProducto] = useState({
@@ -16,22 +15,21 @@ const NuevoProducto = props => {
     const [archivo, guardarArchivo] = useState('');
 
 
-    //Query a la API Buscar uno
-    const consultaAPI = async () => {
-        const consulta = await clienteAxios.get('/productos/'+id);
-        //console.log('consulta: ', consulta.data)
-        //colocar  resultado en el state
-        guardarProducto(consulta.data); 
-    }
+
 
     //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.put('/productos/'+producto._id,producto)
+        const formData = new FormData();
+        formData.append('nombre', producto.nombre);
+        formData.append('precio', producto.precio);
+        formData.append('imagen', archivo);
+        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+        clienteAxios.post('/productos', formData, config)
             .then(res => {
                 console.log('res :', res);
                 Swal.fire(
-                    'Producto Actualizado correctamente!',
+                    'Producto creado correctamente!',
                     'You clicked the button!',
                     'success'
                 )
@@ -56,14 +54,19 @@ const NuevoProducto = props => {
             [e.target.name]:e.target.value});
     }   
 
+    const handleChangeFile = (e) => {
+        //console.log('e.target.files[0] :', e.target.files[0]);
+        guardarArchivo(e.target.files[0]);
+    }   
 
-    //user effect es similar a componetdidmont y willmount
-    useEffect(() => {
-        consultaAPI();
-        /*return () => {
-            cleanup
-        }*/
-    }, []);
+
+    //Validar el formulario
+    const validarProducto = () => {
+        let valido= producto.nombre.length && producto.precio.length;
+        return !valido;
+    }
+
+
 
     return (
         <Fragment>
@@ -97,14 +100,15 @@ const NuevoProducto = props => {
                     <input 
                         type="file" 
                         name="imagen" 
-                        onChange={handleChange}
+                        onChange={handleChangeFile}
                     />
                 </div>
                 <div className="enviar">
                     <input 
                         type="submit" 
                         className="btn btn-azul" 
-                        defaultValue="Agregar Producto" 
+                        value="Agregar Producto" 
+                        disabled={validarProducto()}
                     />
                 </div>
             </form>        

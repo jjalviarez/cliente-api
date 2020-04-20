@@ -20,7 +20,7 @@ const NuevoCliente = ({history}) => {
         e.preventDefault();
         clienteAxios.post('/clientes',cliente)
             .then(res => {
-                console.log('res :', res);
+                //console.log('res :', res);
                 Swal.fire(
                     'Cleinte creado correctamente!',
                     'You clicked the button!',
@@ -54,20 +54,8 @@ const NuevoCliente = ({history}) => {
         //console.log('value :', value);
     });
     return !valido;
-
     }
 
-/*
-
-    //user effect es similar a componetdidmont y willmount
-    useEffect(() => {
-        consultaAPI();
-        return () => {
-            cleanup
-        }
-    }, []);
-*/
-    
     return (
         <Fragment>  
             <h2>Nuevo CLiente</h2>
@@ -123,7 +111,7 @@ const NuevoCliente = ({history}) => {
                     <input
                         type="submit" 
                         className="btn btn-azul" 
-                        defaultValue="Agregar Cliente" 
+                        value="Agregar Cliente" 
                         disabled={validarCliente()}
                     />
                 </div>

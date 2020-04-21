@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+import Spinner from '../layout/Spinner'
 
 const EditarProducto = props => {
     const {id}= props.match.params
@@ -11,6 +12,10 @@ const EditarProducto = props => {
         precio:'',
         imagen:''
     });
+
+    //archivo= State, guardarArchivo = setStaet
+    const [archivo, guardarArchivo] = useState('');
+
 
     //Query a la API Buscar uno
     const consultaAPI = async () => {
@@ -23,9 +28,15 @@ const EditarProducto = props => {
     //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.put('/productos/'+producto._id,producto)
+        const formData = new FormData();
+        formData.append('nombre', producto.nombre);
+        formData.append('precio', producto.precio);
+        formData.append('imagen', archivo);
+        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+        //console.log('archivo :', archivo);
+        clienteAxios.put('/productos/'+producto._id, formData, config)
             .then(res => {
-                console.log('res :', res);
+                //console.log('res :', res);
                 Swal.fire(
                     'Producto Actualizado correctamente!',
                     'You clicked the button!',
@@ -50,6 +61,11 @@ const EditarProducto = props => {
             //Actualuzamos el state agregando una copia del State actual
             ...producto,
             [e.target.name]:e.target.value});
+    }  
+    
+    const handleChangeFile = (e) => {
+        //console.log('e.target.files[0] :', e.target.files[0]);
+        guardarArchivo(e.target.files[0]);
     }   
 
 
@@ -61,9 +77,19 @@ const EditarProducto = props => {
         }*/
     }, []);
 
+    //Validar el formulario
+    const validarProducto = () => {
+        let valido= producto.nombre.length && producto.precio;
+        return !valido;
+    }
+
+
+    //Spinner de Carga
+    if(!producto.nombre.length) return <Spinner/>
+
     return (
         <Fragment>
-            <h2>Nuevo Producto</h2>
+            <h2>Editar Producto</h2>
             <form 
                 onSubmit={handleSubmit}
             >
@@ -74,7 +100,7 @@ const EditarProducto = props => {
                         type="text" 
                         placeholder="Nombre Producto" 
                         name="nombre" 
-                        value={producto.nombre}
+                        defaultValue={producto.nombre}
                         onChange={handleChange}
                     />
                 </div>
@@ -86,24 +112,25 @@ const EditarProducto = props => {
                         min={0.00} 
                         step="0.01" 
                         placeholder="Precio" 
-                        value={producto.precio}
+                        defaultValue={producto.precio}
                         onChange={handleChange}
                     />
                 </div>
                 <div className="campo">
                     <label>Imagen:</label>
+                    {producto.imagen ? <img  src={"http://localhost:8080/"+producto.imagen} alt={producto.nombre} /> :null }
                     <input 
                         type="file" 
                         name="imagen" 
-                        value={producto.imagen}
-                        onChange={handleChange}
+                        onChange={handleChangeFile}
                     />
                 </div>
                 <div className="enviar">
                     <input 
                         type="submit" 
                         className="btn btn-azul" 
-                        defaultValue="Agregar Producto" 
+                        value="Guardar Cambios"
+                        disabled={validarProducto()}
                     />
                 </div>
             </form>        

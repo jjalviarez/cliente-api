@@ -451,7 +451,8 @@ h3.resumen-titulo {
 /*.login .contenedor-formulario {
 
 }*/
-.info-producto img {
+.info-producto img,
+.campo img {
     width: 354px;
 }
 

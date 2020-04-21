@@ -4,16 +4,13 @@ import Swal from 'sweetalert2';
 import clienteAxios from '../../config/axios';
 
 
-
-
-const Cliente = ({cliente}) => {
-    const  {_id,nombre, apellido, empresa, email,telefono } = cliente;
-
+const Producto = ({producto}) => {
+    const {_id,nombre, precio, imagen} = producto;
 
     //Query a la API Eliminar
     const handleClick =  id => {
         Swal.fire({
-            title: 'Quieres Eliminar el Cliente',
+            title: 'Quieres Eliminar el Prodcuto',
             text: "Esto no se puede revertir!",
             icon: 'warning',
             showCancelButton: true,
@@ -23,7 +20,7 @@ const Cliente = ({cliente}) => {
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.value) {
-                clienteAxios.delete('/clientes/'+id)
+                clienteAxios.delete('/productos/'+id)
                 .then(res => {
                     //console.log('res :', res);
                     Swal.fire(
@@ -47,29 +44,29 @@ const Cliente = ({cliente}) => {
 
 
     return (
-        <li className="cliente">
-            <div className="info-cliente">
-                <p className="nombre">{nombre} {apellido}</p>
-                <p className="empresa">{empresa}</p>
-                <p>{email}</p>
-                <p>Tlf: {telefono}</p>
-            </div>
-            <div className="acciones">
-                <Link to={"/clientes/editar/"+_id} className="btn btn-azul">
-                    <i className="fas fa-pen-alt" />
-                    Editar Cliente
-                </Link>
-                <button 
-                    type="button" 
-                    className="btn btn-rojo btn-eliminar"
-                    onClick={() => handleClick(_id)}
-                >
-                    <i className="fas fa-times" />
-                    Eliminar Cliente
-                </button>
-            </div>
-        </li>
+    <li className="producto">
+        <div className="info-producto">
+            <p className="nombre">{nombre}</p>
+            <p className="precio">${precio} </p>
+            <img  src={imagen ? "http://localhost:8080/"+imagen : "/imageProduct.jpg" } alt={nombre} />
+        </div>
+        <div className="acciones">
+            <Link to={"/productos/editar/"+_id} className="btn btn-azul">
+                <i className="fas fa-pen-alt" />
+                Editar Producto
+            </Link>
+            <button 
+                type="button" 
+                className="btn btn-rojo btn-eliminar"
+                onClick={() => handleClick(_id)}
+            >
+                <i className="fas fa-times" />
+                Eliminar Producto
+            </button> 
+        </div>
+    </li>
     );
 };
 
-export default Cliente;
+
+export default Producto;

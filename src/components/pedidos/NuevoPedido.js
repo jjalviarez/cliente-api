@@ -2,6 +2,8 @@ import React, { useState, useEffect, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+import FormBuscarProducto from './FormBuscarProducto';
+import FormCantidadProducto from './FormCantidadProducto';
 
 const NuevoPedido = props => {
     //Extraer ID de cliente 
@@ -9,13 +11,9 @@ const NuevoPedido = props => {
 
         //Trabajar con el state
     // cliente = state, guardarCliente 0 funcion para guardar el state
-    const [cliente, datosCliente] = useState({
-        nombre:'',
-        apellido:'',
-        empresa:'',
-        email:'',
-        telefono:''
-    });
+    const [cliente, datosCliente] = useState({});
+    const [busqueda, guardarBusqueda] = useState('');
+    const [productos, guardarProducto] = useState([]);
 
     useEffect(() => {
 
@@ -34,6 +32,57 @@ const NuevoPedido = props => {
     }, []);
 
 
+    const buscarProducto = async e => {
+
+
+        /*
+        {
+            "cliente": "5e7ec8736df66c329bbc1304",
+            "pedido": [
+                {
+                    "producto": "5e80c9d0ebbb1d214c13ce10",
+                    "cantidad": 3
+                },
+                {
+                    "producto": "5e80ca0bebbb1d214c13ce13",
+                    "cantidad": 1
+                }
+            ],
+            "total": 2586
+        }
+
+        */
+        e.preventDefault();
+        //Obtener los productos de la busqueda  
+        const busquedaProducto = await clienteAxios.get('/productos/busqueda/'+busqueda);
+        if (busquedaProducto.data.length) {
+            let productoResultado=busquedaProducto.data[0];
+            //Agregar la llave a producto
+            productoResultado.producto= productoResultado._id;
+            productoResultado.cantidad=0;
+            //Agregar al State
+            guardarProducto([...productos, productoResultado]);
+
+
+
+        }
+        else {
+            Swal.fire({
+                icon: 'info',
+                title: 'No hay resultado'
+            })
+        }
+
+
+    }
+    
+    //Almacena la busqyeda en el State
+    const leerDatosBusqueda = e => {
+        guardarBusqueda(e.target.value)
+    }
+    
+
+
     return (
         <Fragment>
             <h2>Nuevo Pedido</h2>
@@ -42,6 +91,10 @@ const NuevoPedido = props => {
                 <p>{`${cliente.nombre} ${cliente.apellido}`}</p>
                 <p>{cliente.telefono}</p>
             </div>
+            <FormBuscarProducto
+                buscarProducto={buscarProducto}
+                leerDatosBusqueda={leerDatosBusqueda}
+            />
             <form>
                 <legend>Busca un Producto y agrega una cantidad</legend>
                 <div className="campo">
@@ -49,57 +102,12 @@ const NuevoPedido = props => {
                 <input type="text" placeholder="Nombre Productos" name="productos" />
                 </div>
                 <ul className="resumen">
-                <li>
-                    <div className="texto-producto">
-                    <p className="nombre">Macbook Pro</p>
-                    <p className="precio">$250</p>
-                    </div>
-                    <div className="acciones">
-                    <div className="contenedor-cantidad">
-                        <i className="fas fa-minus" />
-                        <input type="text" name="cantidad" />
-                        <i className="fas fa-plus" />
-                    </div>
-                    <button type="button" className="btn btn-rojo">
-                        <i className="fas fa-minus-circle" />
-                        Eliminar Producto
-                    </button>
-                    </div>
-                </li>
-                <li>
-                    <div className="texto-producto">
-                    <p className="nombre">Macbook Pro</p>
-                    <p className="precio">$250</p>
-                    </div>
-                    <div className="acciones">
-                    <div className="contenedor-cantidad">
-                        <i className="fas fa-minus" />
-                        <input type="text" name="cantidad" />
-                        <i className="fas fa-plus" />
-                    </div>
-                    <button type="button" className="btn btn-rojo">
-                        <i className="fas fa-minus-circle" />
-                        Eliminar Producto
-                    </button>
-                    </div>
-                </li>
-                <li>
-                    <div className="texto-producto">
-                    <p className="nombre">Macbook Pro</p>
-                    <p className="precio">$250</p>
-                    </div>
-                    <div className="acciones">
-                    <div className="contenedor-cantidad">
-                        <i className="fas fa-minus" />
-                        <input type="text" name="cantidad" />
-                        <i className="fas fa-plus" />
-                    </div>
-                    <button type="button" className="btn btn-rojo">
-                        <i className="fas fa-minus-circle" />
-                        Eliminar Producto
-                    </button>
-                    </div>
-                </li>
+                    {productos.map((producto,index) => (
+                        <FormCantidadProducto
+                            key={producto.producto}
+                            producto={producto}
+                        />
+                    ))}
                 </ul>
                 <div className="campo">
                 <label>Total:</label>
@@ -126,4 +134,4 @@ const NuevoPedido = props => {
 
 
 
-export default NuevoPedido;
+export default withRouter(NuevoPedido);

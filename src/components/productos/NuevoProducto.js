@@ -17,7 +17,7 @@ const NuevoProducto = props => {
 
 
 
-    //Query a la API Avtualizar
+    //Query a la API Nuevo
     const handleSubmit =  e => {
         e.preventDefault();
         const formData = new FormData();

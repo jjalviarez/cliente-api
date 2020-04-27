@@ -14,6 +14,7 @@ const NuevoPedido = props => {
     const [cliente, datosCliente] = useState({});
     const [busqueda, guardarBusqueda] = useState('');
     const [productos, guardarProducto] = useState([]);
+    const [total, guardarTotal] = useState(0);
 
     useEffect(() => {
 
@@ -24,12 +25,18 @@ const NuevoPedido = props => {
             datosCliente(consulta.data); 
         }
 
-
+        const actualizarTotal = () => {
+            let nuevoTotal = 0;
+            productos.map(producto => nuevoTotal+= (producto.cantidad*producto.precio));
+            guardarTotal(nuevoTotal);
+        }
+        
         consultaAPI();
-        /*return () => {
-            cleanup
-        }*/
-    }, []);
+
+        actualizarTotal();
+
+
+    }, [productos]);
 
 
     const buscarProducto = async e => {
@@ -54,22 +61,28 @@ const NuevoPedido = props => {
         */
         e.preventDefault();
         //Obtener los productos de la busqueda  
+        if (!busqueda.length) return;
         const busquedaProducto = await clienteAxios.get('/productos/busqueda/'+busqueda);
         if (busquedaProducto.data.length) {
             let productoResultado=busquedaProducto.data[0];
-            //Agregar la llave a producto
-            productoResultado.producto= productoResultado._id;
-            productoResultado.cantidad=0;
-            //Agregar al State
-            guardarProducto([...productos, productoResultado]);
-
-
-
+            if (productos.some(producto => producto.producto === productoResultado._id)) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'El producto ya se encuenta en la lista'
+                })
+              }
+            else { 
+                //Agregar la llave a producto
+                productoResultado.producto= productoResultado._id;
+                productoResultado.cantidad=0;
+                //Agregar al State
+                guardarProducto([...productos, productoResultado]);
+            }
         }
         else {
             Swal.fire({
                 icon: 'info',
-                title: 'No hay resultado'
+                title: 'El producto no encontrado'
             })
         }
 
@@ -80,6 +93,56 @@ const NuevoPedido = props => {
     const leerDatosBusqueda = e => {
         guardarBusqueda(e.target.value)
     }
+    const restarProducro = index => {
+        if (productos[index].cantidad>0) {
+            const listaProductos = [...productos];
+            listaProductos[index].cantidad--;
+            guardarProducto(listaProductos);
+        }
+
+    }
+    
+    const sumarProducto = index => {
+        const listaProductos = [...productos];
+        listaProductos[index].cantidad++;
+        guardarProducto(listaProductos);
+    }    
+    const eliminarProducto = index => {
+
+        const listaProductos = [...productos];
+        listaProductos.splice(index, 1)
+        guardarProducto(listaProductos);
+    }
+
+
+        //Query a la API Nuevo Pedido
+        const handleSubmit =  e => {
+            e.preventDefault();
+            const pedido= {};
+            pedido.cliente=id;
+            pedido.pedido= productos;
+            pedido.total=total;
+            clienteAxios.post('/pedidos', pedido)
+                .then(res => {
+                    console.log('res :', res);
+                    Swal.fire(
+                        'Pedido creado correctamente!',
+                        'You clicked the button!',
+                        'success'
+                    )
+                    //redireccionar 
+                    props.history.push('/pedidos');
+                })
+                .catch(
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                    })
+                )
+            
+        }   
+        
     
 
 
@@ -95,39 +158,42 @@ const NuevoPedido = props => {
                 buscarProducto={buscarProducto}
                 leerDatosBusqueda={leerDatosBusqueda}
             />
-            <form>
-                <legend>Busca un Producto y agrega una cantidad</legend>
-                <div className="campo">
-                <label>Productos:</label>
-                <input type="text" placeholder="Nombre Productos" name="productos" />
-                </div>
-                <ul className="resumen">
-                    {productos.map((producto,index) => (
-                        <FormCantidadProducto
-                            key={producto.producto}
-                            producto={producto}
-                        />
-                    ))}
-                </ul>
-                <div className="campo">
-                <label>Total:</label>
-                <input
-                    type="number"
-                    name="precio"
-                    placeholder="Precio"
-                    readOnly="readonly"
-                />
-                </div>
-                <div className="enviar">
-                <input
-                    type="submit"
-                    className="btn btn-azul"
-                    value="Agregar Pedido"
-                />
-                </div>
-            </form>
-
-
+            <ul className="resumen">
+                {productos.map((producto,index) => (
+                    <FormCantidadProducto
+                        key={producto.producto}
+                        index={index}
+                        producto={producto}
+                        restarProducro={restarProducro}
+                        sumarProducto={sumarProducto}
+                        eliminarProducto={eliminarProducto}
+                    />
+                ))}
+            </ul>
+            <div className="campo">
+            <label>Total:</label>
+            <input
+                type="number"
+                name="precio"
+                placeholder="Precio"
+                readOnly="readonly"
+                value={total}
+            />
+            </div>
+            { total>0 ? (
+                <form
+                    onSubmit={handleSubmit}
+                >
+                    <div className="enviar">
+                    <input
+                        type="submit"
+                        className="btn btn-azul"
+                        value="Agregar Pedido"
+                    />
+                    </div>
+                </form>
+            ) : null
+            }
         </Fragment>
     );
 };

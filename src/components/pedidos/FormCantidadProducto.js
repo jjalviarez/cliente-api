@@ -9,11 +9,21 @@ const FormCantidadProducto = props => {
             </div>
             <div className="acciones">
             <div className="contenedor-cantidad">
-                <i className="fas fa-minus" />
+                <i 
+                    className="fas fa-minus"
+                    onClick={() => props.restarProducro(props.index)}
+                />
                 <p>{props.producto.cantidad}</p>
-                <i className="fas fa-plus" />
+                <i 
+                    className="fas fa-plus"
+                    onClick={() => props.sumarProducto(props.index)}
+                />
             </div>
-            <button type="button" className="btn btn-rojo">
+            <button 
+                type="button" 
+                className="btn btn-rojo"
+                onClick={() => props.eliminarProducto(props.index)}                
+            >
                 <i className="fas fa-minus-circle" />
                 Eliminar Producto
             </button>

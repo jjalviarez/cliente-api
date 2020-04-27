@@ -14,6 +14,7 @@ import EditarCliente from './components/clientes/EditarCliente';
 import NuevoProducto from './components/productos/NuevoProducto';
 import EditarProducto from './components/productos/EditarProducto';
 import NuevoPedido from './components/pedidos/NuevoPedido';
+import EditarPedido from './components/pedidos/EditarPedido';
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
               <Route exact path='/productos/editar/:id' component={EditarProducto} />
               <Route exact path='/pedidos' component={Pedidos} />
               <Route exact path='/pedidos/nuevo/:id' component={NuevoPedido} />
+              <Route exact path='/pedidos/editar/:id' component={EditarPedido} />
             </Switch>
           </main>
         </div>

@@ -1,50 +1,63 @@
-import React /*, { useState, useEffect } */ from 'react';
-import { Link } from 'react-router-dom';
+import React, {useContext} from 'react';
+import { Link, withRouter } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import clienteAxios from '../../config/axios';
+//Importar el context 
+import { CRMContext } from '../../context/CRMContext';
 
 
 
+const Cliente = (props) => {
+    const  {_id,nombre, apellido, empresa, email,telefono } = props.cliente;
 
-const Cliente = ({cliente}) => {
-    const  {_id,nombre, apellido, empresa, email,telefono } = cliente;
-
+    const [auth, guardarAuth] = useContext(CRMContext);
 
     //Query a la API Eliminar
     const handleClick =  id => {
-        Swal.fire({
-            title: 'Quieres Eliminar el Cliente',
-            text: "Esto no se puede revertir!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Si, Eliminar!',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.value) {
-                clienteAxios.delete('/clientes/'+id)
-                .then(res => {
-                    //console.log('res :', res);
-                    Swal.fire(
-                        res.data,
-                        'You clicked the button!',
-                        'success'
-                    )
-                })
-                .catch(
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Something went wrong!',
+        if(auth.token !== '' && auth.auth) {
+            Swal.fire({
+                title: 'Quieres Eliminar el Cliente',
+                text: "Esto no se puede revertir!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, Eliminar!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.value) {
+                    clienteAxios.delete('/clientes/'+id,{
+                        headers: {
+                        'Authorization': `Bearer ${auth.token}`
+                        }
                     })
-                )
-            }
-        })     
+                    .then(res => {
+                        //console.log('res :', res);
+                        Swal.fire(
+                            res.data,
+                            'You clicked the button!',
+                            'success'
+                        )
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Something went wrong!',
+                        })
+                        if(err.response.sratus === 500)  history.push('/login');
+
+                    })
+                }
+            }) 
+        }
+        else {
+            props.history.push('/login');
+        }    
     }
 
 
-
+    if(!auth.auth) props.history.push('/login');
 
     return (
         <li className="cliente">
@@ -76,4 +89,4 @@ const Cliente = ({cliente}) => {
     );
 };
 
-export default Cliente;
+export default withRouter(Cliente);

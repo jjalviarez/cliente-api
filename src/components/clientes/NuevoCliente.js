@@ -1,7 +1,9 @@
-import React, { useState/*, useEffect*/, Fragment } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+//Importar el context 
+import { CRMContext } from '../../context/CRMContext';
 
 const NuevoCliente = ({history}) => {
 
@@ -15,10 +17,17 @@ const NuevoCliente = ({history}) => {
         telefono:''
     });
 
+    const [auth, guardarAuth] = useContext(CRMContext);
+
     //Query a la API
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.post('/clientes',cliente)
+        if(auth.token !== '' && auth.auth) {
+            clienteAxios.post('/clientes',cliente,{
+                headers: {
+                'Authorization': `Bearer ${auth.token}`
+                }
+            })
             .then(res => {
                 //console.log('res :', res);
                 Swal.fire(
@@ -29,14 +38,18 @@ const NuevoCliente = ({history}) => {
                 //redireccionar 
                 history.push('/');
             })
-            .catch(
+            .catch(err => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
                     text: 'Something went wrong!',
-                })
-            )
-        
+                });
+                if(err.response.sratus === 500)  history.push('/login');
+            })
+        }
+        else {
+            history.push('/login');
+        }
     }
 
     const handleChange = (e) => {
@@ -56,6 +69,10 @@ const NuevoCliente = ({history}) => {
     return !valido;
     }
 
+
+    if(!auth.auth) history.push('/login');
+
+    
     return (
         <Fragment>  
             <h2>Nuevo CLiente</h2>

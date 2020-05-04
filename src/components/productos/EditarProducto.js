@@ -1,8 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
-import Spinner from '../layout/Spinner'
+import Spinner from '../layout/Spinner';
+//Importar el context 
+import { CRMContext } from '../../context/CRMContext';
+
 
 const EditarProducto = props => {
     const {id}= props.match.params
@@ -16,25 +19,49 @@ const EditarProducto = props => {
     //archivo= State, guardarArchivo = setStaet
     const [archivo, guardarArchivo] = useState('');
 
+    const [auth, guardarAuth] = useContext(CRMContext);
 
     //Query a la API Buscar uno
     const consultaAPI = async () => {
-        const consulta = await clienteAxios.get('/productos/'+id);
-        //console.log('consulta: ', consulta.data)
-        //colocar  resultado en el state
-        datosProducto(consulta.data); 
+
+
+        if(auth.token !== '' && auth.auth) {
+
+            try {
+                const consulta = await clienteAxios.get('/productos/'+id,{
+                    headers: {
+                    'Authorization': `Bearer ${auth.token}`
+                    }
+                });
+                //console.log('consulta: ', consulta.data)
+                //colocar  resultado en el state
+                datosProducto(consulta.data);  
+            } catch (err) {
+                if (err.response.sratus === 500)  props.history.push('/login');
+
+            }
+        }
+        else {
+            props.history.push('/login');
+        }
+        
+        
     }
 
     //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append('nombre', producto.nombre);
-        formData.append('precio', producto.precio);
-        formData.append('imagen', archivo);
-        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-        //console.log('archivo :', archivo);
-        clienteAxios.put('/productos/'+producto._id, formData, config)
+        if(auth.token !== '' && auth.auth) {
+            const formData = new FormData();
+            formData.append('nombre', producto.nombre);
+            formData.append('precio', producto.precio);
+            formData.append('imagen', archivo);
+            const config = { headers: { 'Content-Type': 'multipart/form-data' ,
+                                        'Authorization': `Bearer ${auth.token}`
+                                    } 
+                            };
+            //console.log('archivo :', archivo);
+            clienteAxios.put('/productos/'+producto._id, formData, config)
             .then(res => {
                 //console.log('res :', res);
                 Swal.fire(
@@ -45,13 +72,19 @@ const EditarProducto = props => {
                 //redireccionar 
                 props.history.push('/productos');
             })
-            .catch(
+            .catch(err =>{
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
                     text: 'Something went wrong!',
                 })
-            )
+                if (err.response.sratus === 500)  props.history.push('/login');
+
+            })
+        }
+        else {
+            props.history.push('/login');
+        }
         
     }   
     
@@ -83,7 +116,9 @@ const EditarProducto = props => {
         return !valido;
     }
 
+    if(!auth.auth) props.history.push('/login');
 
+    
     //Spinner de Carga
     if(!producto.nombre.length) return <Spinner/>
 

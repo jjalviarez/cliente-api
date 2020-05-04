@@ -1,7 +1,9 @@
-import React, { useState, Fragment } from 'react';
+import React, { useState, useContext, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+//Importar el context 
+import { CRMContext } from '../../context/CRMContext';
 
 const NuevoProducto = props => {
 
@@ -10,6 +12,8 @@ const NuevoProducto = props => {
         nombre:'',
         precio:''
     });
+
+    const [auth, guardarAuth] = useContext(CRMContext);
 
     //archivo= State, guardarArchivo = setStaet
     const [archivo, guardarArchivo] = useState('');
@@ -20,12 +24,16 @@ const NuevoProducto = props => {
     //Query a la API Nuevo
     const handleSubmit =  e => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append('nombre', producto.nombre);
-        formData.append('precio', producto.precio);
-        formData.append('imagen', archivo);
-        const config = { headers: { 'Content-Type': 'multipart/form-data' } };
-        clienteAxios.post('/productos', formData, config)
+        if(auth.token !== '' && auth.auth) {
+            const formData = new FormData();
+            formData.append('nombre', producto.nombre);
+            formData.append('precio', producto.precio);
+            formData.append('imagen', archivo);
+            const config = { headers: { 'Content-Type': 'multipart/form-data' ,
+                                        'Authorization': `Bearer ${auth.token}`
+                                    } 
+                            };
+            clienteAxios.post('/productos', formData, config)
             .then(res => {
                 console.log('res :', res);
                 Swal.fire(
@@ -36,13 +44,18 @@ const NuevoProducto = props => {
                 //redireccionar 
                 props.history.push('/productos');
             })
-            .catch(
+            .catch(err => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
                     text: 'Something went wrong!',
                 })
-            )
+                if(err.response.sratus === 500)  props.history.push('/login');
+            })
+        }
+        else {
+            props.history.push('/login');
+        }
         
     }   
     
@@ -66,6 +79,7 @@ const NuevoProducto = props => {
         return !valido;
     }
 
+    if(!auth.auth) props.history.push('/login');
 
 
     return (

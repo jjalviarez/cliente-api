@@ -1,7 +1,10 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import clienteAxios from '../../config/axios';
 import Swal from 'sweetalert2';
 import { withRouter } from 'react-router-dom';
+//Importar el context 
+import { CRMContext } from '../../context/CRMContext';
+import Spinner from '../layout/Spinner';
 
 const EditarCliente = props => {
     const {id}= props.match.params
@@ -15,20 +18,39 @@ const EditarCliente = props => {
         telefono:''
     });
 
+    const [auth, guardarAuth] = useContext(CRMContext);
+
     //Query a la API Buscar uno
     const consultaAPI = async () => {
-        const consulta = await clienteAxios.get('/clientes/'+id);
-        //console.log('consulta: ', consulta.data)
-        //colocar  resultado en el state
-        datosCliente(consulta.data); 
+
+        if(auth.token !== '' && auth.auth) {
+
+            try {
+                const consulta = await clienteAxios.get('/clientes/'+id,{
+                    headers: {
+                    'Authorization': `Bearer ${auth.token}`
+                    }
+                });
+                //console.log('consulta: ', consulta.data)
+                //colocar  resultado en el state
+                datosCliente(consulta.data); 
+            } catch (err) {
+                if (err.response.sratus === 500)  props.history.push('/login');
+
+            }
+        }
+        else {
+            props.history.push('/login');
+        }
     }
 
     //Query a la API Avtualizar
     const handleSubmit =  e => {
         e.preventDefault();
-        clienteAxios.put('/clientes/'+cliente._id,cliente)
+        if(auth.token !== '' && auth.auth) {
+            clienteAxios.put('/clientes/'+cliente._id,cliente)
             .then(res => {
-                console.log('res :', res);
+                //console.log('res :', res);
                 Swal.fire(
                     'Cleinte Actualizado correctamente!',
                     'You clicked the button!',
@@ -37,14 +59,19 @@ const EditarCliente = props => {
                 //redireccionar 
                 props.history.push('/');
             })
-            .catch(
+            .catch(err =>{
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
                     text: 'Something went wrong!',
                 })
-            )
-        
+                if (err.response.sratus === 500)  props.history.push('/login');
+
+            })
+        }
+        else {
+            props.history.push('/login');
+        }
     }
 
     const handleChange = (e) => {
@@ -74,7 +101,12 @@ const EditarCliente = props => {
         }*/
     }, []);
 
-    
+    if(!auth.auth) props.history.push('/login');
+
+
+    //Spinner de Carga
+    if(!cliente.nombre.length) return <Spinner/>
+
     return (
         <Fragment>  
             <h2>Actualizar CLiente</h2>

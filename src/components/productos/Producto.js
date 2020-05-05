@@ -64,7 +64,7 @@ const Producto = (props) => {
         <div className="info-producto">
             <p className="nombre">{nombre}</p>
             <p className="precio">${precio} </p>
-            <img  src={imagen ? "http://localhost:8080/"+imagen : "/imageProduct.jpg" } alt={nombre} />
+            <img  src={imagen ? process.env.REACT_APP_BACKEND_URL+imagen : "/imageProduct.jpg" } alt={nombre} />
         </div>
         <div className="acciones">
             <Link to={"/productos/editar/"+_id} className="btn btn-azul">

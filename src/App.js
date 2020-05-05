@@ -25,7 +25,6 @@ const App = () => {
   //Utilizar Contex en el Componente
   const [auth, guardarAuth] = useContext(CRMContext);
 
-
   return (
     
     <Router> 

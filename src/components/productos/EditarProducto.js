@@ -153,7 +153,7 @@ const EditarProducto = props => {
                 </div>
                 <div className="campo">
                     <label>Imagen:</label>
-                    {producto.imagen ? <img  src={"http://localhost:8080/"+producto.imagen} alt={producto.nombre} /> :null }
+                    {producto.imagen ? <img  src={process.env.REACT_APP_BACKEND_URL+producto.imagen} alt={producto.nombre} /> :null }
                     <input 
                         type="file" 
                         name="imagen" 
